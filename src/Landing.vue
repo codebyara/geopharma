@@ -11,7 +11,7 @@
           Indonesia's First Geo-Pharmaceutical Disaster Intelligence Platform
         </p>
         <div class="flex flex-wrap justify-center">
-          <button class="bg-[#1b5e20] hover:bg-[#0d4722] text-white px-8 py-3 rounded-full text-base md:text-lg font-medium flex items-center gap-2 transition-all duration-300 shadow-sm border border-[#8bc34a]">
+          <button @click="scrollToSection" class="bg-[#1b5e20] hover:bg-[#0d4722] text-white px-8 py-3 rounded-full text-base md:text-lg font-medium flex items-center gap-2 transition-all duration-300 shadow-sm border border-[#8bc34a]">
             Get Started
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -50,7 +50,7 @@
       </div>
     </section>
 
-    <section class="py-12 px-6 max-w-7xl mx-auto">
+    <section id="map-section" class="py-12 px-6 max-w-7xl mx-auto">
       <div class="text-center mb-10">
         <h2 class="text-3xl font-bold text-gray-800 mb-2">Real-Time Intelligence Map</h2>
         <p class="text-gray-500">Real-time visualization of current field operations and disease vector density.</p>
@@ -277,6 +277,13 @@
 import { ref, reactive, onMounted } from 'vue'
 import InteractiveMap from './InteractiveMap.vue'
 
+const scrollToSection = () => {
+  const mapSection = document.getElementById('map-section')
+  if (mapSection) {
+    mapSection.scrollIntoView({ behavior: 'smooth' })
+  }
+}
+
 // 1. TAMBAHAN: Menyambungkan komponen InteractiveMap agar bisa disetir dari luar
 const mapRef = ref(null)
 
@@ -288,7 +295,7 @@ const layerControls = reactive({
   prioritasWilayah: false,
   fasilitasKesehatan: true,
   airSanitasi: false,
-  ruteDrone: true,
+  ruteDrone: false,
   laporanLapangan: true,
 })
 

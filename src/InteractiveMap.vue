@@ -1,45 +1,58 @@
 <template>
-  <div class="interactive-map-wrapper relative w-full h-full rounded-xl overflow-hidden border border-outline-variant">
-    <div v-if="isLoading" class="absolute inset-0 z-[500] bg-on-surface/90 flex flex-col items-center justify-center gap-4">
+  <div class="interactive-map-wrapper relative w-full h-full" :class="theme === 'light' ? 'bg-gray-200' : 'bg-[#1a1f1a] rounded-xl overflow-hidden border border-outline-variant'">
+    
+    <div v-if="isLoading" class="absolute inset-0 z-[500] flex flex-col items-center justify-center gap-4" :class="theme === 'light' ? 'bg-white/90' : 'bg-on-surface/90'">
       <div class="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-      <span class="font-label-caps text-[10px] text-surface-variant/70 tracking-widest">MEMPROSES DATA...</span>
+      <span class="font-label-caps text-[10px] tracking-widest" :class="theme === 'light' ? 'text-gray-500' : 'text-surface-variant/70'">MEMPROSES DATA...</span>
     </div>
 
-    <div ref="mapContainer" class="w-full h-full"></div>
+    <div ref="mapContainer" class="absolute inset-0 w-full h-full z-0"></div>
 
-    <div class="absolute top-4 right-4 z-[400] flex items-center gap-2 bg-on-surface/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-outline-variant">
-      <span class="relative flex h-2 w-2">
-        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary-container opacity-75"></span>
-        <span class="relative inline-flex rounded-full h-2 w-2 bg-secondary-container"></span>
-      </span>
-      <span class="font-label-caps text-[9px] text-surface-variant">LIVE · BMKG</span>
-    </div>
-
-    <div class="absolute top-14 right-4 z-[400]">
-      <button @click="tarikDataKeSupabase" class="bg-[#1b5e20] hover:bg-[#0d4722] text-white font-bold text-[9px] px-3 py-2 rounded-lg shadow-lg transition-all flex items-center gap-2 border border-[#8bc34a]">
-        🔄 SEDOT DATA PETA BENCANA
+    <div class="absolute bottom-24 right-4 z-[400]">
+      <button @click="resetPeta" class="bg-white/95 backdrop-blur-sm hover:bg-white text-indigo-700 p-3 rounded-full shadow-lg border border-gray-200 transition-all hover:scale-110 flex items-center justify-center group" title="Reset Zoom (Tampilkan Seluruh Indonesia)">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 group-hover:-rotate-45 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
       </button>
     </div>
 
-    <div class="absolute top-4 left-4 z-[400] flex gap-2">
-      <div class="bg-on-surface/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-outline-variant">
-        <span class="font-label-caps text-[9px] text-surface-variant">🔴 {{ quakeCount }} GEMPA</span>
+    <template v-if="theme === 'dark'">
+      
+      <div class="absolute top-4 right-4 z-[400] flex items-center gap-2 bg-on-surface/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-outline-variant">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary-container opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-secondary-container"></span>
+        </span>
+        <span class="font-label-caps text-[9px] text-surface-variant">LIVE · BMKG</span>
       </div>
-      <div class="bg-on-surface/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-outline-variant">
-        <span class="font-label-caps text-[9px] text-surface-variant">📍 {{ sampleCount }} BENCANA LAIN</span>
-      </div>
-    </div>
 
-    <div class="absolute bottom-4 left-4 z-[400] bg-on-surface/80 backdrop-blur-sm p-3 rounded-lg border border-outline-variant">
-      <div class="font-label-caps text-[9px] text-surface-variant/70 mb-2">LEGENDA</div>
-      <div v-for="type in disasterTypes" :key="type.key" class="flex items-center gap-2 mb-1">
-        <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" :style="{ backgroundColor: type.color }"></span>
-        <span class="font-label-caps text-[9px] text-surface-variant">{{ type.label }}</span>
+      <div class="absolute top-14 right-4 z-[400]">
+        <button @click="tarikDataKeSupabase" class="bg-[#1b5e20] hover:bg-[#0d4722] text-white font-bold text-[9px] px-3 py-2 rounded-lg shadow-lg transition-all flex items-center gap-2 border border-[#8bc34a]">
+          🔄 SEDOT DATA PETA BENCANA
+        </button>
       </div>
-      <div class="border-t border-outline-variant/40 mt-2 pt-2">
-        <div class="font-label-caps text-[8px] text-surface-variant/50">Gempa: © BMKG</div>
+
+      <div class="absolute top-4 left-4 z-[400] flex gap-2">
+        <div class="bg-on-surface/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-outline-variant">
+          <span class="font-label-caps text-[9px] text-surface-variant">🔴 {{ quakeCount }} GEMPA</span>
+        </div>
+        <div class="bg-on-surface/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-outline-variant">
+          <span class="font-label-caps text-[9px] text-surface-variant">📍 {{ sampleCount }} BENCANA LAIN</span>
+        </div>
       </div>
-    </div>
+
+      <div class="absolute bottom-4 left-4 z-[400] bg-on-surface/80 backdrop-blur-sm p-3 rounded-lg border border-outline-variant">
+        <div class="font-label-caps text-[9px] text-surface-variant/70 mb-2">LEGENDA</div>
+        <div v-for="type in disasterTypes" :key="type.key" class="flex items-center gap-2 mb-1">
+          <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" :style="{ backgroundColor: type.color }"></span>
+          <span class="font-label-caps text-[9px] text-surface-variant">{{ type.label }}</span>
+        </div>
+        <div class="border-t border-outline-variant/40 mt-2 pt-2">
+          <div class="font-label-caps text-[8px] text-surface-variant/50">Gempa: © BMKG</div>
+        </div>
+      </div>
+
+    </template>
   </div>
 </template>
 
@@ -51,7 +64,8 @@ import { getReports } from './services/petabencana.service.js'
 export default defineComponent({
   name: 'InteractiveMap',
   props: {
-    activeLayers: { type: Object, default: () => ({}) }
+    activeLayers: { type: Object, default: () => ({}) },
+    theme: { type: String, default: 'dark'}
   },
   emits: ['disaster-selected', 'stats-updated'],
   setup(props, { emit }) {
@@ -61,6 +75,50 @@ export default defineComponent({
     const sampleCount = ref(0)
     let mapInstance = null
     let refreshInterval = null
+    let rawDisasters = []
+    let rawGempa = []
+    let rawFaskes = []
+    let rawDrones = []
+    
+    // VARIABEL MEMORI DRONE REALTIME
+    let droneMarkers = {} 
+    let droneSubscription = null;
+
+    function resetPeta() {
+      if (!mapInstance) return;
+      mapInstance.closePopup(); 
+      mapInstance.flyTo([-2.5, 118.0], 5, { duration: 1.5 }); 
+    }
+
+    function hitungStatistikLayar() {
+      if (!mapInstance) return;
+
+      const bounds = mapInstance.getBounds();
+      const diDalamLayar = (lat, lng) => lat && lng && bounds.contains([lat, lng]);
+
+      const gempaTerlihat = rawGempa.filter(g => diDalamLayar(g.lat, g.lng));
+      const bencanaTerlihat = rawDisasters.filter(d => diDalamLayar(d.latitude, d.longitude));
+      const faskesTerlihat = rawFaskes.filter(f => diDalamLayar(f.latitude, f.longitude));
+      const droneTerlihat = rawDrones.filter(d => diDalamLayar(d.latitude, d.longitude));
+      
+      quakeCount.value = gempaTerlihat.length;
+      sampleCount.value = bencanaTerlihat.length;
+
+      emit('stats-updated', {
+        total: gempaTerlihat.length + bencanaTerlihat.length,
+        prioritasTinggi: bencanaTerlihat.filter(d => d.risk_score > 70).length,
+        faskes: faskesTerlihat.length,
+        droneAktif: droneTerlihat.filter(d => d.status === 'en_route').length,
+        korban: bencanaTerlihat.reduce((sum, d) => sum + (d.casualties || 0), 0),
+        luasZona: bencanaTerlihat.reduce((sum, d) => sum + (d.affected_area || 0), 0),
+        daftarArea: rawDisasters.map((d, index) => ({
+          id: d.id || index,
+          nama: d.area_name || 'Lokasi Terlapor',
+          lat: d.latitude,
+          lng: d.longitude
+        }))
+      });
+    }
 
     const layerGroups = {
       zonaBencana: null, prioritasWilayah: null,
@@ -80,10 +138,6 @@ export default defineComponent({
     const typeColorMap = Object.fromEntries(disasterTypes.map(t => [t.key, t.color]))
     const getColor = (type) => typeColorMap[type] || '#607D8B'
     const typeIcon = (type) => ({ flood:'🌊', earthquake:'🔴', tsunami:'🌊', fire:'🔥', haze:'🌫️', wind:'💨', volcano:'🌋' }[type] || '⚠️')
-    const typeToLayerKey = {
-      earthquake: 'zonaBencana', tsunami: 'zonaBencana', flood: 'zonaBencana',
-      fire: 'zonaBencana', volcano: 'zonaBencana', wind: 'zonaBencana', haze: 'zonaBencana',
-    }
 
     watch(() => props.activeLayers, (newLayers) => {
       if (!mapInstance) return
@@ -100,56 +154,63 @@ export default defineComponent({
         layerGroups.prioritasWilayah.clearLayers();
         const inaRiskLayer = window.L.esri.dynamicMapLayer({
             url: 'https://gis.bnpb.go.id/server/rest/services/inarisk/layer_bahaya_banjir_bandang_30/MapServer',
-            opacity: 0.8,
+            opacity: props.theme === 'light' ? 1.0 : 0.8,
         });
         inaRiskLayer.addTo(layerGroups.prioritasWilayah);
     }
 
-    function createMarkerIcon(type, magnitude) {
+    function createMarkerIcon(type, magnitude, riskScore = 0, isFieldReport = false) {
       const color = getColor(type)
       const size = (type === 'earthquake' || type === 'tsunami') ? (magnitude >= 6.0 ? 22 : magnitude >= 5.0 ? 16 : 12) : 13
       const pulse = type === 'tsunami' || (type === 'earthquake' && magnitude >= 5.0) || type !== 'earthquake'
+      
+      const isHighPriority = riskScore > 70;
+      const pulseColor = isHighPriority ? '#ef4444' : color; 
+      const pulseAnim = isHighPriority ? 'animation:ping 1s cubic-bezier(0,0,0.2,1) infinite;' : 'animation:ping 1.5s cubic-bezier(0,0,0.2,1) infinite;';
+      
+      const priorityBadge = isHighPriority ? `<div style="position:absolute; top:-6px; right:-6px; background:#ef4444; color:white; border-radius:50%; width:16px; height:16px; font-size:11px; font-weight:bold; display:flex; align-items:center; justify-content:center; border:2px solid white; z-index:10; box-shadow: 0 2px 4px rgba(0,0,0,0.4);">!</div>` : '';
+
+      if (isFieldReport) {
+        return window.L.divIcon({
+          className: '',
+          html: `<div style="position:relative;display:flex;align-items:center;justify-content:center;width:32px;height:32px;">
+              ${pulse ? `<span style="position:absolute;width:40px;height:40px;border-radius:50%;background:${pulseColor};opacity:${isHighPriority ? 0.6 : 0.35};${pulseAnim}"></span>` : ''}
+              <span style="position:relative;width:28px;height:28px;border-radius:50%;background:white;border:2px solid #cbd5e1;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.3);font-size:14px;">📝</span>
+              ${priorityBadge}
+            </div>`,
+          iconSize: [32, 32], iconAnchor: [16, 16],
+        })
+      }
+
       return window.L.divIcon({
         className: '',
         html: `<div style="position:relative;display:flex;align-items:center;justify-content:center;width:${size+12}px;height:${size+12}px;">
-            ${pulse ? `<span style="position:absolute;width:${size+8}px;height:${size+8}px;border-radius:50%;background:${color};opacity:0.35;animation:ping 1.5s cubic-bezier(0,0,0.2,1) infinite;"></span>` : ''}
-            <span style="position:relative;width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,0.85);display:flex;align-items:center;justify-content:center;">${type === 'tsunami' ? '<span style="font-size:7px;">🌊</span>' : ''}</span>
+            ${pulse ? `<span style="position:absolute;width:${size+8}px;height:${size+8}px;border-radius:50%;background:${pulseColor};opacity:${isHighPriority ? 0.6 : 0.35};${pulseAnim}"></span>` : ''}
+            <span style="position:relative;width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.3);">${type === 'tsunami' ? '<span style="font-size:7px;">🌊</span>' : ''}</span>
+            ${priorityBadge}
           </div>`,
         iconSize: [size+12, size+12], iconAnchor: [(size+12)/2, (size+12)/2],
       })
     }
 
-    // Fungsi agar peta bisa "diterbangkan" dari luar (oleh dropdown sidebar)
     function arahkanPeta(lat, lng, zoomLevel = 12) {
       if (!mapInstance) return;
-      
-      // 1. Terbangkan peta ke lokasi tujuan
-      mapInstance.flyTo([lat, lng], zoomLevel, {
-        duration: 1.5 // Animasi terbang selama 1.5 detik
-      });
-
-      // 2. Tunggu sampai animasi terbang selesai, lalu buka titiknya otomatis!
+      mapInstance.flyTo([lat, lng], zoomLevel, { duration: 1.5 });
       setTimeout(() => {
         let titikDitemukan = false;
-        
-        // Memindai semua titik (marker) yang ada di peta saat ini
         mapInstance.eachLayer((layer) => {
-          // Pastikan yang dipindai adalah sebuah titik/marker yang punya koordinat
           if (layer instanceof window.L.Marker && layer.getLatLng) {
             const posisiTitik = layer.getLatLng();
-            
-            // Cek apakah koordinat titik ini sama dengan koordinat kota yang dipilih
-            // (Kita beri toleransi selisih 0.05 derajat agar tetap terdeteksi meski lokasinya tidak persis di tengah kota)
             if (Math.abs(posisiTitik.lat - lat) < 0.05 && Math.abs(posisiTitik.lng - lng) < 0.05) {
               if (!titikDitemukan) {
-                layer.openPopup();   // Otomatis membuka kotak popup (Seperti gambar 2)
-                layer.fire('click'); // Memicu klik gaib agar Sidebar Kanan ikut ter-update!
+                layer.openPopup();   
+                layer.fire('click'); 
                 titikDitemukan = true;
               }
             }
           }
         });
-      }, 1500); // 1500 milidetik = 1.5 detik (menunggu durasi flyTo selesai)
+      }, 1500); 
     }
 
     async function fetchBMKGGempa() {
@@ -174,50 +235,80 @@ export default defineComponent({
       marker.addTo(layerGroups.zonaBencana)
     }
 
-    function addSupabaseDisasterMarker(dbRow) {
+    function addSupabaseDisasterMarker(dbRow, targetLayer, isFieldReport = false) {
       if (!mapInstance || !dbRow.latitude || !dbRow.longitude) return
       const type = dbRow.disaster_type || 'flood'
       const diseases = dbRow.disease_predictions || []
       const medicines = dbRow.medical_needs || []
       
-      const marker = window.L.marker([dbRow.latitude, dbRow.longitude], { icon: createMarkerIcon(type, 0) })
+      const marker = window.L.marker([dbRow.latitude, dbRow.longitude], { icon: createMarkerIcon(type, 0, dbRow.risk_score, isFieldReport) })      
       
+      const imageHtml = dbRow.image_url 
+        ? `<div style="width: 100%; height: 130px; border-radius: 8px; overflow: hidden; margin-bottom: 12px; border: 1px solid #d1d5db; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+             <img src="${dbRow.image_url}" style="width: 100%; height: 100%; object-fit: cover;" alt="Foto Lapangan" />
+           </div>` 
+        : '';
+
+      const isHighPriority = dbRow.risk_score > 70;
+      const priorityBadge = isHighPriority ? `<span style="background:#ef4444;color:white;padding:2px 6px;border-radius:4px;font-size:8px;font-weight:bold;margin-left:6px;box-shadow:0 1px 2px rgba(0,0,0,0.2);letter-spacing:0.5px;">PRIORITAS TINGGI</span>` : '';
+
+      const isLight = props.theme === 'light';
+      const textColor = isLight ? '#111827' : '#e8f0e8';
+      const mutedColor = isLight ? '#4b5563' : '#aaaaaa';
+      const boxColor = isLight ? '#f3f4f6' : '#1a1f1a';
+      const borderColor = isLight ? '#d1d5db' : '#3a4a3a';
+      const highlightColor = isLight ? '#e5e7eb' : '#2a362a';
+
+      const aiButtonHtml = isLight ? `
+        <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed ${borderColor};">
+          <button onclick="window.location.href='/smart-relief?id=${dbRow.id}'" style="width: 100%; background: #4f46e5; color: white; border: none; padding: 10px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 6px -1px rgba(79,70,229,0.3); transition: background 0.3s;">
+            <span style="font-size: 16px;">🤖</span> LAKUKAN ANALISIS AI
+          </button>
+        </div>
+      ` : '';
+
       marker.bindPopup(`
-        <div style="font-family:inherit;min-width:240px;color:#e8f0e8;">
+        <div style="font-family:inherit;min-width:240px;color:${textColor};">
+          ${imageHtml}
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-            <span style="font-size:16px;">${typeIcon(type)}</span>
+            <span style="font-size:18px;">${typeIcon(type)}</span>
             <div>
-              <div style="font-size:12px;font-weight:700;color:${getColor(type)};text-transform:uppercase;">${dbRow.title || type}</div>
-              <div style="font-size:9px;color:#aaa;">📍 ${dbRow.area_name || 'Lokasi'}</div>
+              <div style="font-size:12px;font-weight:700;color:${getColor(type)};text-transform:uppercase;display:flex;align-items:center;">
+                ${dbRow.title || type} ${priorityBadge}
+              </div>
+              <div style="font-size:9px;color:${mutedColor};">📍 ${dbRow.area_name || 'Lokasi'}</div>
             </div>
           </div>
-          <div style="background:rgba(139, 195, 74, 0.1); border: 1px solid #8bc34a; padding:6px; border-radius:6px; margin-bottom:10px;">
-            <div style="font-size:9px;color:#8bc34a;font-weight:bold;margin-bottom:4px;">🤖 PREDIKSI PENYAKIT (AI)</div>
+          
+          <div style="background:rgba(139, 195, 74, 0.1); border: 1px solid #8bc34a; padding:8px; border-radius:6px; margin-bottom:10px;">
+            <div style="font-size:9px;color:#7cb342;font-weight:bold;margin-bottom:6px;">🦠 PREDIKSI PENYAKIT (AI)</div>
             <div style="font-size:11px;font-weight:600;display:flex;flex-wrap:wrap;gap:4px;">
-              ${diseases.map(d => `<span style="background:#2a362a;padding:2px 6px;border-radius:4px;">${d.nama || d}</span>`).join('')}
+              ${diseases.map(d => `<span style="background:${highlightColor};border:1px solid ${borderColor};padding:2px 6px;border-radius:4px;color:${textColor};">${d.nama || d}</span>`).join('')}
             </div>
           </div>
-          <div style="font-size:10px;font-weight:bold;margin-bottom:4px;">Permintaan kebutuhan medis:</div>
-          <div style="max-height:90px;overflow-y:auto;background:#1a1f1a;border:1px solid #3a4a3a;border-radius:6px;margin-bottom:10px;">
+          
+          <div style="font-size:10px;font-weight:bold;margin-bottom:4px;color:${textColor};">Permintaan Kebutuhan Medis:</div>
+          
+          <div style="max-height:90px;overflow-y:auto;background:${boxColor};border:1px solid ${borderColor};border-radius:6px;margin-bottom:10px;">
             ${medicines.map(m => `
-              <div style="display:flex;justify-content:space-between;padding:6px 8px;border-bottom:1px solid #2a362a;">
-                <span style="font-size:10px;color:#aaa;width:40%;">${m.qty} ${m.unit}</span>
-                <span style="font-size:10px;font-weight:600;width:60%;text-align:right;">${m.name}</span>
+              <div style="display:flex;justify-content:space-between;padding:6px 8px;border-bottom:1px solid ${borderColor};">
+                <span style="font-size:10px;color:${mutedColor};width:40%;">${m.qty} ${m.unit}</span>
+                <span style="font-size:10px;font-weight:600;width:60%;text-align:right;color:${textColor};">${m.name}</span>
               </div>`).join('')}
           </div>
+          
           <div style="text-align:center;">
-            <div style="font-size:9px;color:#aaa;margin-bottom:4px;">Logistik Farmasi Terpenuhi: <strong style="color:#fff;">${dbRow.fulfillment_pct || 0}%</strong></div>
-            <div style="width:100%;background:#2a362a;border-radius:10px;height:8px;overflow:hidden;">
+            <div style="font-size:9px;color:${mutedColor};margin-bottom:4px;">Logistik Terpenuhi: <strong style="color:${textColor};">${dbRow.fulfillment_pct || 0}%</strong></div>
+            <div style="width:100%;background:${borderColor};border-radius:10px;height:8px;overflow:hidden;">
               <div style="width:${dbRow.fulfillment_pct || 0}%;background:#8bc34a;height:100%;"></div>
             </div>
           </div>
+          
+          ${aiButtonHtml}
         </div>`, { maxWidth: 280 })
 
-      marker.on('click', () => emit('disaster-selected', {
-        type, severity: dbRow.severity || 'medium', area: dbRow.area_name, title: dbRow.title, 
-        intel: { diseases: diseases.map(d => d.nama || d), medicines, fulfillment: dbRow.fulfillment_pct }
-      }))
-      marker.addTo(layerGroups[typeToLayerKey[type]] || layerGroups.zonaBencana)
+      marker.on('click', () => emit('disaster-selected', { type, severity: dbRow.severity || 'medium', area: dbRow.area_name, title: dbRow.title, intel: { diseases: diseases.map(d => d.nama || d), medicines, fulfillment: dbRow.fulfillment_pct } }))
+      marker.addTo(targetLayer)
     }
 
     function addFaskesMarker(dbRow) {
@@ -245,50 +336,12 @@ export default defineComponent({
       marker.addTo(layerGroups.fasilitasKesehatan);
     }
 
-    function addDroneMarker(dbRow) {
-      if (!mapInstance || !dbRow.latitude || !dbRow.longitude) return;
-      const isEnRoute = dbRow.status === 'en_route';
-      const color = isEnRoute ? '#2196F3' : '#9E9E9E';
-
-      const popupContent = `
-        <div style="font-family:inherit;min-width:180px;color:#e8f0e8;">
-          <div style="font-size:12px;font-weight:700;color:${color};">Drone Logistik: ${dbRow.drone_code}</div>
-          <div style="font-size:10px;color:#aaa;margin-bottom:6px;text-transform:capitalize;">Status: ${dbRow.status.replace('_', ' ')}</div>
-          <div style="font-size:10px;background:#1a1f1a;padding:6px;border-radius:4px;border:1px solid #3a4a3a;">
-            <strong>Muatan (Payload):</strong><br><span style="color:#fff;">${dbRow.payload}</span>
-          </div>
-        </div>
-      `;
-
-      if (isEnRoute && dbRow.target_latitude && dbRow.target_longitude) {
-        const routeLine = window.L.polyline([
-          [dbRow.latitude, dbRow.longitude], 
-          [dbRow.target_latitude, dbRow.target_longitude]
-        ], {
-          color: '#2196F3', weight: 4, dashArray: '8, 6', opacity: 0.8
-        });
-
-        routeLine.bindPopup(popupContent);
-        routeLine.addTo(layerGroups.ruteDrone);
-      }
-    }
-
     function addWaterSanitationMarker(dbRow) {
       if (!mapInstance || !dbRow.latitude || !dbRow.longitude) return;
-      
       let iconSymbol = '💧';
-      let color = '#2196F3'; // Biru (Normal/Aman)
-      
-      if (dbRow.status === 'contaminated') { 
-        color = '#F44336'; // Merah
-        iconSymbol = '☣️'; 
-      } 
-      
-      // Jika statusnya kekeringan, ubah ikon menjadi padang pasir/kering dan warna oranye
-      if (dbRow.is_drought || dbRow.status === 'empty') { 
-        color = '#FF9800'; // Oranye
-        iconSymbol = '🏜️'; 
-      }
+      let color = '#2196F3'; 
+      if (dbRow.status === 'contaminated') { color = '#F44336'; iconSymbol = '☣️'; } 
+      if (dbRow.is_drought || dbRow.status === 'empty') { color = '#FF9800'; iconSymbol = '🏜️'; }
 
       const wsIcon = window.L.divIcon({
         className: '',
@@ -297,8 +350,6 @@ export default defineComponent({
       });
 
       const marker = window.L.marker([dbRow.latitude, dbRow.longitude], { icon: wsIcon });
-      
-      // Logika untuk menampilkan label Kekeringan
       const droughtLabel = dbRow.is_drought 
         ? '<span style="color:#FF9800;font-weight:bold;">⚠️ STATUS: DARURAT KEKERINGAN</span>' 
         : '<span style="color:#4CAF50;">✅ Tidak Ada Kekeringan (Krisis Sanitasi)</span>';
@@ -309,9 +360,7 @@ export default defineComponent({
           <div style="font-size:9px;color:#aaa;margin-bottom:8px;text-transform:capitalize;">Tipe Pemantauan: ${dbRow.facility_type.replace('_', ' ')}</div>
           
           <div style="font-size:10px;background:#1a1f1a;padding:8px;border-radius:6px;border:1px solid #3a4a3a;margin-bottom:8px;">
-            <div style="margin-bottom:6px;border-bottom:1px solid #2a362a;padding-bottom:4px;">
-              ${droughtLabel}
-            </div>
+            <div style="margin-bottom:6px;border-bottom:1px solid #2a362a;padding-bottom:4px;">${droughtLabel}</div>
             <div style="color:#ccc;">
               <strong style="color:#8bc34a;">Analisis Kondisi Sanitasi:</strong><br>
               <span style="font-style:italic;line-height:1.4;">"${dbRow.sanitation_condition || 'Data pemantauan belum tersedia.'}"</span>
@@ -356,60 +405,13 @@ export default defineComponent({
 
     async function tarikDataKeSupabase() {
       if (!confirm("Ambil 3 data bencana yang sudah terjadi?")) return;
-      
       isLoading.value = true;
       try {
         const bankDataBencana = [
           { type: 'flood', lat: 5.5483, lng: 95.3238, area: 'Banda Aceh', title: 'Banjir Genangan Kota' },
           { type: 'flood', lat: 3.5952, lng: 98.6722, area: 'Medan, Sumut', title: 'Banjir Luapan Sungai Deli' },
           { type: 'wind', lat: 1.3005, lng: 97.6453, area: 'Nias, Sumut', title: 'Angin Puting Beliung' },
-          { type: 'flood', lat: -0.4719, lng: 100.3758, area: 'Tanah Datar, Sumbar', title: 'Banjir Bandang Sumbar' },
-          { type: 'volcano', lat: -0.3817, lng: 100.4736, area: 'Agam, Sumbar', title: 'Erupsi Gunung Marapi' },
-          { type: 'haze', lat: 0.5071, lng: 101.4478, area: 'Pekanbaru, Riau', title: 'Kabut Asap Riau' },
-          { type: 'haze', lat: -1.6101, lng: 103.6131, area: 'Jambi', title: 'Kabut Asap Karhutla Jambi' },
-          { type: 'flood', lat: -3.7928, lng: 102.2608, area: 'Bengkulu', title: 'Banjir Pesisir Bengkulu' },
-          { type: 'haze', lat: -2.9760, lng: 104.7754, area: 'Palembang, Sumsel', title: 'Kabut Asap Karhutla Sumsel' },
-          { type: 'wind', lat: -5.4500, lng: 105.2667, area: 'Bandar Lampung', title: 'Angin Kencang Lampung' },
-          { type: 'flood', lat: -6.1214, lng: 106.1465, area: 'Serang, Banten', title: 'Banjir Luapan Cibanten' },
-          { type: 'flood', lat: -6.2088, lng: 106.8456, area: 'Jakarta Pusat', title: 'Banjir Genangan DKI' },
-          { type: 'flood', lat: -6.2415, lng: 106.9924, area: 'Bekasi, Jabar', title: 'Banjir Perumahan Bekasi' },
-          { type: 'wind', lat: -6.5971, lng: 106.7915, area: 'Bogor, Jabar', title: 'Puting Beliung Bogor' },
-          { type: 'wind', lat: -6.9634, lng: 107.7554, area: 'Rancaekek, Jabar', title: 'Puting Beliung Rancaekek' },
-          { type: 'flood', lat: -7.2278, lng: 107.9087, area: 'Garut, Jabar', title: 'Banjir Bandang Cimanuk' },
-          { type: 'flood', lat: -6.7320, lng: 108.5523, area: 'Cirebon, Jabar', title: 'Banjir Rob Pantura' },
-          { type: 'flood', lat: -6.8944, lng: 110.6388, area: 'Kab. Demak, Jateng', title: 'Banjir Luapan Sungai Wulan' },
-          { type: 'flood', lat: -6.9932, lng: 110.4203, area: 'Semarang, Jateng', title: 'Banjir Rob Semarang' },
-          { type: 'flood', lat: -7.0868, lng: 110.9158, area: 'Grobogan, Jateng', title: 'Banjir Bandang Grobogan' },
-          { type: 'wind', lat: -7.5666, lng: 110.8250, area: 'Surakarta, Jateng', title: 'Angin Kencang Solo Raya' },
-          { type: 'wind', lat: -7.7956, lng: 110.3695, area: 'Yogyakarta', title: 'Angin Puting Beliung DIY' },
-          { type: 'flood', lat: -8.1990, lng: 111.1116, area: 'Pacitan, Jatim', title: 'Banjir Pesisir Pacitan' },
-          { type: 'fire', lat: -7.9424, lng: 112.9530, area: 'TNBTS, Jatim', title: 'Kebakaran Lahan Bromo' },
-          { type: 'wind', lat: -7.4478, lng: 112.7183, area: 'Sidoarjo, Jatim', title: 'Angin Kencang Sidoarjo' },
-          { type: 'flood', lat: -8.1333, lng: 113.2150, area: 'Lumajang, Jatim', title: 'Banjir Lahar Dingin Semeru' },
-          { type: 'fire', lat: -8.2192, lng: 114.3692, area: 'Banyuwangi, Jatim', title: 'Kebakaran Hutan Ijen' },
-          { type: 'fire', lat: -8.7185, lng: 115.2150, area: 'Denpasar, Bali', title: 'Kebakaran TPA Suwung' },
-          { type: 'wind', lat: -8.1120, lng: 115.0882, area: 'Singaraja, Bali', title: 'Angin Kencang Buleleng' },
-          { type: 'flood', lat: -8.5833, lng: 116.1167, area: 'Mataram, NTB', title: 'Banjir Genangan Kota' },
-          { type: 'flood', lat: -8.4556, lng: 118.7275, area: 'Bima, NTB', title: 'Banjir Bandang Bima' },
-          { type: 'volcano', lat: -8.5389, lng: 122.7667, area: 'Flores Timur, NTT', title: 'Erupsi Lewotobi' },
-          { type: 'wind', lat: -10.1583, lng: 123.5750, area: 'Kupang, NTT', title: 'Badai Angin Tropis' },
-          { type: 'haze', lat: -0.0270, lng: 109.3333, area: 'Pontianak, Kalbar', title: 'Kabut Asap Gambut' },
-          { type: 'flood', lat: 0.8145, lng: 112.9224, area: 'Kapuas Hulu, Kalbar', title: 'Banjir Kapuas Hulu' },
-          { type: 'haze', lat: -2.2030, lng: 113.9213, area: 'Palangkaraya, Kalteng', title: 'Kabut Asap Karhutla Kalteng' },
-          { type: 'flood', lat: -2.5310, lng: 112.9500, area: 'Sampit, Kalteng', title: 'Banjir DAS Mentaya' },
-          { type: 'haze', lat: -3.3166, lng: 114.5901, area: 'Banjarmasin, Kalsel', title: 'Kabut Asap Kalsel' },
-          { type: 'flood', lat: -1.2654, lng: 116.8312, area: 'Balikpapan, Kaltim', title: 'Banjir Hujan Deras' },
-          { type: 'fire', lat: -0.5022, lng: 117.1536, area: 'Samarinda, Kaltim', title: 'Kebakaran Lahan Gambut' },
-          { type: 'flood', lat: 3.3036, lng: 117.6322, area: 'Tarakan, Kaltara', title: 'Banjir Genangan Tarakan' },
-          { type: 'flood', lat: -5.1477, lng: 119.4327, area: 'Makassar, Sulsel', title: 'Banjir Genangan Makassar' },
-          { type: 'wind', lat: -3.0135, lng: 119.9806, area: 'Toraja, Sulsel', title: 'Puting Beliung Toraja' },
-          { type: 'flood', lat: -3.9985, lng: 122.5127, area: 'Kendari, Sultra', title: 'Banjir Kota Kendari' },
-          { type: 'wind', lat: -0.8917, lng: 119.8707, area: 'Palu, Sulteng', title: 'Angin Kencang Palu' },
-          { type: 'flood', lat: 0.5435, lng: 123.0567, area: 'Gorontalo', title: 'Banjir Bandang Gorontalo' },
-          { type: 'volcano', lat: 2.3040, lng: 125.3710, area: 'Sitaro, Sulut', title: 'Erupsi Gunung Ruang' },
-          { type: 'flood', lat: -3.6947, lng: 128.1813, area: 'Ambon, Maluku', title: 'Banjir Longsor Ambon' },
-          { type: 'flood', lat: -0.8615, lng: 131.2520, area: 'Sorong, Papua Barat', title: 'Banjir Genangan Sorong' },
-          { type: 'flood', lat: -2.5337, lng: 140.7181, area: 'Jayapura, Papua', title: 'Banjir Bandang Jayapura' }
+          { type: 'flood', lat: -0.4719, lng: 100.3758, area: 'Tanah Datar, Sumbar', title: 'Banjir Bandang Sumbar' }
         ];
 
         const diacak = bankDataBencana.sort(() => 0.5 - Math.random());
@@ -421,7 +423,7 @@ export default defineComponent({
           dataUntukDisimpan.push({
             created_at: new Date().toISOString(),
             disaster_type: b.type,
-            title: b.title,
+            title: "[SIMULASI]" + b.title,
             area_name: b.area,
             severity: 'high',
             latitude: b.lat,
@@ -449,14 +451,77 @@ export default defineComponent({
       }
     }
 
+    // ==========================================
+    // FUNGSI BARU UNTUK KORIDOR & ANIMASI DRONE
+    // ==========================================
+    function setupDroneRealtime() {
+      droneSubscription = supabase.channel('map-drone-movement')
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'drones' }, payload => {
+           const updatedDrone = payload.new;
+           
+           if (droneMarkers[updatedDrone.id]) {
+             droneMarkers[updatedDrone.id].setLatLng([
+               updatedDrone.current_latitude || updatedDrone.latitude || -5.1345, 
+               updatedDrone.current_longitude || updatedDrone.longitude || 119.4908
+             ]);
+           }
+        }).subscribe();
+    }
+
+    function drawFlightCorridors() {
+      rawDisasters.forEach(bencana => {
+        if (bencana.latitude && bencana.longitude) {
+          const routeLine = window.L.polyline([
+            [-5.1345, 119.4908], // Titik Markas Makassar
+            [bencana.latitude, bencana.longitude]
+          ], { color: '#3b82f6', weight: 2, dashArray: '6, 8', opacity: 0.4 });
+          routeLine.addTo(layerGroups.ruteDrone);
+        }
+      });
+    }
+
+    function addDroneMarker(dbRow) {
+      if (!mapInstance || !dbRow.latitude || !dbRow.longitude) return;
+      
+      // JANGAN GAMBAR DRONE JIKA TIDAK SEDANG TERBANG
+      if (dbRow.status !== 'en_route') return; 
+
+      const popupContent = `
+        <div style="font-family:inherit;min-width:180px;color:#e8f0e8;">
+          <div style="font-size:12px;font-weight:700;color:#2196F3;">Drone Logistik: ${dbRow.drone_code}</div>
+          <div style="font-size:10px;color:#aaa;margin-bottom:6px;text-transform:capitalize;">Status: MENGUDARA</div>
+        </div>
+      `;
+
+      const droneIcon = window.L.divIcon({
+        className: 'drone-bergerak', // Mengaktifkan transisi mulus
+        html: `<div style="font-size:24px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));">🛩️</div>`,
+        iconSize: [30, 30], 
+        iconAnchor: [15, 15]
+      });
+
+      const lat = dbRow.current_latitude || -5.1345;
+      const lng = dbRow.current_longitude || 119.4908;
+      
+      const marker = window.L.marker([lat, lng], { icon: droneIcon });
+      marker.bindPopup(popupContent);
+      marker.addTo(layerGroups.ruteDrone);
+      
+      // Simpan ke memori agar bisa digeser oleh Emulator
+      droneMarkers[dbRow.id] = marker; 
+    }
+    // ==========================================
+
+
     async function loadData() {
       isLoading.value = true;
       try {
+        // RESET MEMORI DRONE SETIAP KALI LOAD
+        droneMarkers = {}; 
         Object.values(layerGroups).forEach(lg => lg && lg.clearLayers())
 
-        let gempaList = await fetchBMKGGempa().catch(() => [])
-        quakeCount.value = gempaList.length
-        gempaList.forEach(g => addGempaMarker(g))
+        rawGempa = await fetchBMKGGempa().catch(() => [])
+        rawGempa.forEach(g => addGempaMarker(g))
 
         let liveBencanaList = [];
         try {
@@ -486,47 +551,41 @@ export default defineComponent({
               }
             });
           }
-        } catch (e) {
-          console.warn("Info: Tidak ada laporan live dari PetaBencana saat ini.", e);
-        }
+        } catch (e) {}
 
         const { data: dbDisasters } = await supabase.from('disasters').select('*')
+        rawDisasters = [...liveBencanaList, ...(dbDisasters || [])];
+
+        if (liveBencanaList.length > 0) {
+          liveBencanaList.forEach(d => addSupabaseDisasterMarker(d, layerGroups.zonaBencana, false));
+        }
+
+        if (dbDisasters && dbDisasters.length > 0) {
+          dbDisasters.forEach(d => {
+            if (d.title && d.title.includes('[SIMULASI]')) {
+              addSupabaseDisasterMarker(d, layerGroups.zonaBencana, false);
+            } else {
+              addSupabaseDisasterMarker(d, layerGroups.laporanLapangan, true);
+            }
+          });
+        }
+
         const { data: dbFaskes } = await supabase.from('health_facilities').select('*')
-        if (dbFaskes) dbFaskes.forEach(f => addFaskesMarker(f))
+        rawFaskes = dbFaskes || [];
+        rawFaskes.forEach(f => addFaskesMarker(f))
 
         const { data: dbDrones } = await supabase.from('drones').select('*')
-        if (dbDrones) dbDrones.forEach(d => addDroneMarker(d))
+        rawDrones = dbDrones || [];
+        
+        // MEMANGGIL KORIDOR UDARA DAN DRONE TERBANG
+        drawFlightCorridors();
+        rawDrones.forEach(d => addDroneMarker(d))
 
         const { data: dbWater } = await supabase.from('water_sanitation').select('*')
         if (dbWater) dbWater.forEach(w => addWaterSanitationMarker(w))
-
-        const semuaBencanaLain = [...liveBencanaList, ...(dbDisasters || [])];
-
-        if (semuaBencanaLain.length > 0) {
-          semuaBencanaLain.forEach(d => addSupabaseDisasterMarker(d))
-          sampleCount.value = semuaBencanaLain.length
-        } else {
-          sampleCount.value = 0
-        }
-
-        emit('stats-updated', {
-          total: gempaList.length + sampleCount.value,
-          prioritasTinggi: semuaBencanaLain.filter(d => d.risk_score > 70).length,
-          faskes: dbFaskes ? dbFaskes.length : 0,
-          droneAktif: dbDrones ? dbDrones.filter(d => d.status === 'en_route').length : 0,
-          korban: semuaBencanaLain.reduce((sum, d) => sum + (d.casualties || 0), 0),
-          luasZona: semuaBencanaLain.reduce((sum, d) => sum + (d.affected_area || 0), 0),
-
-          daftarArea: semuaBencanaLain.map((d, index) => ({
-            id: index,
-            nama: d.area_name,
-            lat: d.latitude,
-            lng: d.longitude,
-            zoom: 12
-          }))
-        })
-
+        
         loadInaRiskBanjir();
+        hitungStatistikLayar();
 
       } finally {
         isLoading.value = false;
@@ -548,12 +607,19 @@ export default defineComponent({
         })
 
         const style = document.createElement('style')
-        style.textContent = `@keyframes ping { 75%,100% { transform:scale(2.2);opacity:0; } } .leaflet-popup-content-wrapper { background:#1a1f1a !important; color:#e8f0e8 !important; border:1px solid #3a4a3a !important; border-radius:8px !important; box-shadow:0 4px 24px rgba(0,0,0,0.6) !important; } .leaflet-popup-tip { background:#1a1f1a !important; } .leaflet-popup-close-button { color:#e8f0e8 !important; }`
+        if (props.theme === 'light') {
+          style.textContent = `@keyframes ping { 75%,100% { transform:scale(2.2);opacity:0; } } .leaflet-popup-content-wrapper { background: white !important; color: #1f2937 !important; border-radius: 0.75rem !important; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1) !important; border-top: 4px solid #ef4444 !important; } .leaflet-popup-tip { background: white !important; } .leaflet-popup-content { margin: 16px !important; } .leaflet-popup-content p { margin: 0 !important; }`
+        } else {
+          style.textContent = `@keyframes ping { 75%,100% { transform:scale(2.2);opacity:0; } } .leaflet-popup-content-wrapper { background:#1a1f1a !important; color:#e8f0e8 !important; border:1px solid #3a4a3a !important; border-radius:8px !important; box-shadow:0 4px 24px rgba(0,0,0,0.6) !important; } .leaflet-popup-tip { background:#1a1f1a !important; } .leaflet-popup-close-button { color:#e8f0e8 !important; }`
+        }
         document.head.appendChild(style)
       }
 
       mapInstance = window.L.map(mapContainer.value, { center: [-2.5, 118.0], zoom: 5, zoomControl: false, attributionControl: false })
-      window.L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 18 }).addTo(mapInstance)
+      const tileUrl = props.theme === 'light' 
+        ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+        : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+      window.L.tileLayer(tileUrl, { maxZoom: 19 }).addTo(mapInstance)
       window.L.control.zoom({ position: 'bottomright' }).addTo(mapInstance)
 
       Object.keys(layerGroups).forEach(key => {
@@ -562,18 +628,38 @@ export default defineComponent({
       })
 
       await loadData()
+
+      mapInstance.on('moveend', hitungStatistikLayar);
+      mapInstance.on('zoomend', hitungStatistikLayar);
     }
 
-    onMounted(() => { initMap(); refreshInterval = setInterval(loadData, 5 * 60 * 1000) })
-    onUnmounted(() => { if (refreshInterval) clearInterval(refreshInterval); if (mapInstance) mapInstance.remove() })
+    onMounted(() => { 
+      initMap(); 
+      setupDroneRealtime(); // NYALAKAN RADAR!
+      refreshInterval = setInterval(loadData, 5 * 60 * 1000);
+    })
+    
+    onUnmounted(() => { 
+      if (refreshInterval) clearInterval(refreshInterval); 
+      if (mapInstance) mapInstance.remove(); 
+      if (droneSubscription) supabase.removeChannel(droneSubscription); // MATIKAN RADAR
+    })
 
-    return { mapContainer, isLoading, quakeCount, sampleCount, disasterTypes, tarikDataKeSupabase, arahkanPeta }
+    return { mapContainer, isLoading, quakeCount, sampleCount, disasterTypes, tarikDataKeSupabase, arahkanPeta, loadData, resetPeta } 
   }
 })
 </script>
 
 <style scoped>
 .interactive-map-wrapper :deep(.leaflet-popup-content::-webkit-scrollbar) { width: 4px; }
-.interactive-map-wrapper :deep(.leaflet-popup-content::-webkit-scrollbar-track) { background: #1a1f1a; }
-.interactive-map-wrapper :deep(.leaflet-popup-content::-webkit-scrollbar-thumb) { background: #3a4a3a; border-radius: 4px; }
+.interactive-map-wrapper :deep(.leaflet-popup-content::-webkit-scrollbar-track) { background: transparent; }
+.interactive-map-wrapper :deep(.leaflet-popup-content::-webkit-scrollbar-thumb) { background: #cbd5e1; border-radius: 4px; }
+
+/* CSS UNTUK ANIMASI DRONE MELUNCUR HALUS */
+.interactive-map-wrapper :deep(.drone-bergerak) {
+  transition: transform 1.5s linear !important; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 </style>

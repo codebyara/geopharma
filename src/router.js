@@ -8,12 +8,25 @@ import SmartReliefAllocation from './SmartReliefAllocation.vue'
 import WaterSanitation from './WaterSanitation.vue'
 import EarlyWarningSystem from './EarlyWarningSystem.vue'
 import DroneTracking from './DroneTracking.vue'
+import AssetManagement from './AssetManagement.vue'
+import About from './AboutUs.vue'
+import FeaturesView from './FeaturesView.vue'
 
 const routes = [
   {
     path: '/',
     name: 'Landing',
     component: Landing
+  },
+  {
+    path: '/about',
+    name: 'about',
+    component: About
+  },
+  {
+    path: '/features',
+    name: 'features',
+    component: FeaturesView
   },
   {
     path: '/login',
@@ -56,6 +69,11 @@ const routes = [
     name: 'DroneTracking',
     component: DroneTracking,
     meta: { requiresAuth: true }
+  },
+  {
+      path: '/asset-management',
+      name: 'AssetManagement',
+      component: AssetManagement
   }
 ]
 

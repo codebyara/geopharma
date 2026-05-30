@@ -61,7 +61,7 @@
             :disabled="loading"
             class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition disabled:opacity-50"
           >
-            {{ loading ? 'Memproses...' : 'Login ke Dashboard' }}
+            {{ loading ? 'Memproses...' : 'Login' }}
           </button>
         </form>
       </div>
